@@ -11,9 +11,9 @@ typedef struct partition_info {
   char start_head;
   char start_sector;
   unsigned short start_cylinder;
-  char system_id;
-  char end_head;
-  char end_sector;
+  unsigned char system_id;
+  unsigned char end_head;
+  unsigned char end_sector;
   unsigned short end_cylinder;
   unsigned int start_lba;
   unsigned int total_sectors;

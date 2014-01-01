@@ -1,3 +1,4 @@
+#include <colors.h>
 #include <system.h>
 #include <lba.h>
 
@@ -51,7 +52,6 @@ int lba_read_sectors
   unsigned short offset = drive->bus == PRIMARY ? 0 : LBA_S_OFFSET;
   int i;
   unsigned char response;
-  printf("offset: %x, bus: %d\n", offset, drive->bus);
   while( (response & LBA_STATUS_DRIVE_BUSY) && !(response & 1) )
     response = inportb(LBA_COMMAND_PORT + offset);
   for (i = 0; i < count; i++) {
@@ -68,17 +68,10 @@ int lba_read_sectors
     inportsw(LBA_DATA_PORT+offset, (char*)(buff+i*512), 256);
     int i2;
     unsigned int temp;
-    /* for(i2=0;i2<256;i2++){ */
-    /*   temp = inportw(LBA_DATA_PORT + offset); */
-    /*   //printf("%x ", temp); */
-    /*   buff[i2*2] = temp & 0xff; */
-    /*   buff[i2*2+1] = (temp >> 8) & 0xff; */
-    /* } */
-    /* for (i = 0; i < 4; i++) inportb(LBA_COMMAND_PORT + offset); */
-    printf("read addr:%x\n", (unsigned int)buff);
-    for(i=0;i<16;i++)printf("%x ", buff[446+i]);
-    printf("\nend\n");
   }
+    printf("read_sector:\n");
+    for(i=0;i<16;i++)printf("%x ", buff[i+446]); printf("\n");
+
   return 1;
 }
 
@@ -141,6 +134,8 @@ void identify(unsigned short drive_t) {
     offset = LBA_S_OFFSET;
     break;
   }
+  settextcolor(GREEN, BLACK);
+  printf("IDENTIFY\n");
 
   outportb(LBA_SECTOR_COUNT_PORT + offset, 0x00);
   outportb(LBA_0_BLOCK_ADDR_PORT + offset, 0x00);
@@ -175,6 +170,7 @@ void identify(unsigned short drive_t) {
   } else {
     // Drive doesn't exists
   }
+  settextcolor(WHITE, BLACK);
 }
 
 void init_drives() {

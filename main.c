@@ -136,7 +136,7 @@ void outportw(unsigned short _port, unsigned int _data) {
 
 main(multiboot_info_t *mbd, unsigned int magic) {
 
-  //  init_paging();
+  init_paging();
   gdt_install();
   idt_install();
   isrs_install();
@@ -152,7 +152,8 @@ main(multiboot_info_t *mbd, unsigned int magic) {
   cpuid();
   printf("GRUB flags: %b\n", mbd->flags);
 
-  if (mbd->flags & MULTIBOOT_MEM_FLAG) {
+  //  if (mbd->flags & MULTIBOOT_MEM_FLAG) {
+  if (0) {
     unsigned long total_mem = 0, entry_size;
     printf("Memory map:\n");
     memory_map_t *mmap = mbd->mmap_addr;
@@ -171,7 +172,7 @@ main(multiboot_info_t *mbd, unsigned int magic) {
   init_mem((memory_map_t*)mbd->mmap_addr,
            mbd->mmap_addr + mbd->mmap_length);
 
-  //  init_fs();
+  init_fs();
   //  test_lba();
 
   for (;;);

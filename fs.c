@@ -9,8 +9,9 @@ partition_info_t* parse_partition_info(char* sector) {
     return NULL;
   }
   int i;
-  printf("parsed block:\n");
+  printf("parsed block:\n"); printf("\n");
   for(i=0;i<16;i++)printf("%x ", sector[i]);
+  printf("\n");
   partition_info_t *info =
     (partition_info_t*) malloc(sizeof(partition_info_t));
 
@@ -26,13 +27,10 @@ partition_info_t* parse_partition_info(char* sector) {
 
 partition_info_t** init_partition_table(lba_drive_t *d) {
   char *sector = (char*)malloc(512);
-  /* char sector[512]; */
   partition_info_t *p, *partitions[4];
   int i;
-  for(i=0;i<512;i++) sector[i] = 0;
+
   lba_read_sectors(d, 0, 1, sector);
-  for(i=0;i<16;i++)printf("%x ", sector[446+i]);
-  printf("sectors read at %x\n", (unsigned int)sector);
 
   for(i=0; i<4; i++) {
     p = parse_partition_info((char*)(sector+446+i*16));
@@ -40,7 +38,7 @@ partition_info_t** init_partition_table(lba_drive_t *d) {
     if (p) {
       p->drive = d;
       partitions[i] = p;
-      printf("total sectors: %d\n", p->start_lba);
+      printf("partition %d total sectors: %d\n", i, p->start_lba);
 
       switch (p->system_id) {
       case FS_TYPE_EXT2:
@@ -63,7 +61,5 @@ void fs_read_sectors
 
 void init_fs() {
   init_drives();
-
   init_partition_table(get_drive(LBA_PRIMARY_MASTER));
-  printf("init bus as %x\n", get_drive(LBA_PRIMARY_MASTER));
 }

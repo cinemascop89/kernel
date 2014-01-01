@@ -82,7 +82,7 @@ void puts(unsigned char *text) {
 
 void putint(int val, int b) {
   static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-  char result[11];
+  char result[30];
   int tot_digits = 0, orig_val = val, curr_digit, i=0, j;
 
   if (val < 0) {
