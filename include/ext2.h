@@ -11,7 +11,7 @@
 #define EXT2_ERROR_BEHAVIOUR_PANIC   3
 
 typedef struct ext2_superblock {
-    unsigned int total_inodes;
+  unsigned int total_inodes;
   unsigned int total_blocks;
   unsigned int superuser_blocks;
   unsigned int unallocated_blocks;
@@ -44,23 +44,80 @@ typedef struct ext2_superblock {
   unsigned short superuser_id;
   unsigned short superuser_groupid;
 
-  // TODO: add extended fields
+  // Extended fields
+  unsigned int first_free_inode;
+  unsigned short inode_size;
+  unsigned short containing_superblock; //Block group that this superblock is part of (if backup copy)
+  unsigned int optional_features;
+  unsigned int required_features;
+  unsigned int read_only_features;
+
+  char fs_id[16];
+  char vol_name[16];
+  char mount_path[64];
+
+  unsigned int compression_alg;
+  unsigned char file_preallocate_blocks;
+  unsigned char dir_preallocate_blocks;
+  unsigned short unused;
+
+  char journal_id[16];
+  unsigned int journal_inode;
+  unsigned int journal_device;
+  unsigned int orphan_inode_list_head;
 
 } ext2_superblock_t;
 
+typedef struct ext2_bgd_entry {
+  unsigned int block_usage_bmap;
+  unsigned int inode_usage_bmap;
+  unsigned int inode_table;
+  unsigned short unallocated_blocks;
+  unsigned short unallocated_inodes;
+  unsigned short directories;
+} ext2_bgd_entry_t;
+
+typedef struct ext2_inode {
+  unsigned short type_and_perm;
+  unsigned short uid;
+  unsigned int size_lower;
+
+  unsigned int last_access;
+  unsigned int created;
+  unsigned int last_modification;
+  unsigned int deletion;
+
+  unsigned short gid;
+  unsigned short hardlink_count;
+  unsigned int sector_count;
+  unsigned int flags;
+  unsigned int os_value1;
+
+  unsigned int direct_pointers[12];
+  unsigned int singly_indirect_pointer;
+  unsigned int doubly_indirect_pointer;
+  unsigned int triply_indirect_pointer;
+
+  unsigned int gen_number;
+  unsigned int ext_attr_block;
+  unsigned int size_higher;
+
+  unsigned int fragment_addr;
+  char os_value2[12];
+} ext2_inode_t;
+
+typedef struct ext2_dir_entry {
+  unsigned int inode;
+  unsigned short total_size;
+  unsigned char type;
+  char *name;
+} ext2_dir_entry_t;
+
 typedef struct ext2_fs_info {
   ext2_superblock_t *superblock;
+  ext2_bgd_entry_t **bgdt;
   partition_info_t *partition;
 } ext2_fs_info_t;
-
-/* typedef struct ext2_bgd { */
-/*   unsigned int bock_usage_bmap; */
-/*   unsigned int inode_usage_bmap; */
-/*   unsigned int inode_table; */
-/*   unsigned short unallocated_blocks; */
-/*   unsigned short unallocated_inodes; */
-/*   unsigned short directories; */
-/* } ext2_bgd_t; */
 
 ext2_fs_info_t* ext2_init_fs(partition_info_t* p);
 #endif

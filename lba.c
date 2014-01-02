@@ -69,9 +69,6 @@ int lba_read_sectors
     int i2;
     unsigned int temp;
   }
-    printf("read_sector:\n");
-    for(i=0;i<16;i++)printf("%x ", buff[i+446]); printf("\n");
-
   return 1;
 }
 

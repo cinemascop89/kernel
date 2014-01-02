@@ -22,7 +22,7 @@ void init_mem(memory_map_t *mmap, int map_size) {
   /*   } */
   /*   mmap = (memory_map_t*) ((unsigned int) mmap + mmap->size + sizeof(unsigned int)); */
   /* } */
-  base_node = (watermark_node*) 0x0;
+  base_node = (watermark_node*) 0x10; // 0x0 is NULL
   base_node->next = NULL;
   base_node->size = 0xc00000;
 }
@@ -42,6 +42,6 @@ void* malloc(int size) {
     node->next = NULL;
   }
 
-  printf("allocated %db node at %x\n",allocate_size, (void*)(node - allocate_size/8));
+  //  printf("allocated %db node at %x\n",allocate_size, (void*)(node - allocate_size/8));
   return (void*)(node - allocate_size/8);
 }

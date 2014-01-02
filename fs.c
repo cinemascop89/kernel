@@ -9,9 +9,6 @@ partition_info_t* parse_partition_info(char* sector) {
     return NULL;
   }
   int i;
-  printf("parsed block:\n"); printf("\n");
-  for(i=0;i<16;i++)printf("%x ", sector[i]);
-  printf("\n");
   partition_info_t *info =
     (partition_info_t*) malloc(sizeof(partition_info_t));
 
