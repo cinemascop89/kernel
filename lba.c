@@ -1,4 +1,5 @@
 #include <colors.h>
+#include <types.h>
 #include <system.h>
 #include <lba.h>
 
@@ -60,7 +61,7 @@ int lba_read_sectors
     do {
       response = inportb(LBA_COMMAND_PORT + offset);
       if ((response & LBA_STATUS_ERROR) || (response & LBA_STATUS_DRIVE_FAULT)) {
-        printf("disk error: %b\n", response);
+        printf("disk error reading 0x%x: %b\n", address, response);
         return 0;
       }
     } while(!(response & LBA_STATUS_DATA_READY));

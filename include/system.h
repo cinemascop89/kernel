@@ -2,8 +2,6 @@
 #define __SYSTEM_H
 #include <multiboot.h>
 
-#define NULL 0
-
 #define PIC1		0x20
 #define PIC2		0xA0
 #define PIC1_COMMAND	PIC1
@@ -29,7 +27,6 @@
 extern unsigned char *memcpy(unsigned char *dest, const unsigned char *src, int count);
 extern unsigned char *memset(unsigned char *dest, unsigned char val, int count);
 extern unsigned short *memsetw(unsigned short *dest, unsigned short val, int count);
-extern int strlen(const char *str);
 unsigned char inportb (unsigned short _port);
 unsigned int inportw (unsigned short _port);
 void inportsw(unsigned short port, void *addr, unsigned long count);
@@ -75,4 +72,5 @@ void keyboard_install();
 extern void do_e820();
 void init_mem(memory_map_t *mmap, int map_size);
 void* malloc(int size);
+void free(void* p, int size);
 #endif

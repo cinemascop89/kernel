@@ -1,4 +1,6 @@
 #include <system.h>
+#include <types.h>
+#include <str.h>
 #include <colors.h>
 #include <lba.h>
 #include <ext2.h>
@@ -27,14 +29,6 @@ unsigned short *memsetw(unsigned short *dest, unsigned short val, int count) {
     dest[i] = val;
   }
   return dest;
-}
-
-int strlen(const char *str) {
-  int len = 0;
-  while (str[len] != '\0') {
-    len++;
-  }
-  return len;
 }
 
 void welcome_message() {
@@ -171,6 +165,11 @@ main(multiboot_info_t *mbd, unsigned int magic) {
   }
   init_mem((memory_map_t*)mbd->mmap_addr,
            mbd->mmap_addr + mbd->mmap_length);
+
+  /* char in[] = "/boot", *tok; */
+  /* strtok((char*)"/boot", "/"); */
+  /* while(tok = strtok(NULL, "/")) printf("%s\n", tok); */
+  /* printf("final string: %s\n"); */
 
   init_fs();
   //  test_lba();

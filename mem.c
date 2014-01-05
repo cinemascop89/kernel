@@ -1,3 +1,4 @@
+#include <types.h>
 #include <system.h>
 #include <multiboot.h>
 
@@ -44,4 +45,8 @@ void* malloc(int size) {
 
   //  printf("allocated %db node at %x\n",allocate_size, (void*)(node - allocate_size/8));
   return (void*)(node - allocate_size/8);
+}
+
+void free(void *p, int size) {
+
 }
