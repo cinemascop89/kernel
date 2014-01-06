@@ -1,7 +1,9 @@
 #include <kb.h>
+#include <types.h>
 #include <system.h>
 
 int kbd_state = 0;
+char curr_char = NULL;
 
 void keyboard_handler(struct regs *r) {
   unsigned char scancode;
@@ -10,15 +12,16 @@ void keyboard_handler(struct regs *r) {
   if (scancode & 0x80) {
     //key released
   } else {
-    putch(kbdus[scancode]);
+    curr_char = kbdus[scancode];
   }
 }
 
-void mouse_handler(struct regs *r) {
-  printf("mouse\n");
+char getch() {
+  curr_char = NULL;
+  while(!curr_char);
+  return curr_char;
 }
 
 void keyboard_install() {
   irq_install_handler(1, keyboard_handler);
-  irq_install_handler(12, mouse_handler);
 }

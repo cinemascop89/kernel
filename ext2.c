@@ -1,8 +1,13 @@
 #include <system.h>
+#include <str.h>
 #include <types.h>
 #include <fs.h>
 #include <ext2.h>
 
+unsigned int read(fs_node_t*,unsigned int,unsigned int,char*);
+unsigned int write(fs_node_t*,unsigned int,unsigned int,char*);
+void open(fs_node_t*);
+void close(fs_node_t*);
 struct dirent* readdir(struct fs_node* node, unsigned int index);
 fs_node_t* finddir(fs_node_t *node, char *name);
 
@@ -120,6 +125,10 @@ fs_node_t* ext2_inode_to_fs
 
   node->fs = info;
 
+  node->read = read;
+  node->write = write;
+  node->open = open;
+  node->close = close;
   node->finddir = finddir;
   node->readdir = readdir;
 
@@ -136,6 +145,61 @@ fs_node_t* ext2_root_node(ext2_fs_info_t *info) {
   return root;
 }
 
+unsigned int read(fs_node_t *node, unsigned int offset, unsigned int size, char *buffer) {
+  ext2_fs_info_t *info = (ext2_fs_info_t*)node->fs;
+  ext2_inode_t *inode = ext2_read_inode(info, node->inode);
+  unsigned int block_size = ext2_get_block_size(info->superblock);
+  unsigned int *block_list =
+    (unsigned int*)malloc(sizeof(unsigned int)*(size/block_size) + 1);
+  char *block = (char*)malloc(block_size);
+
+  unsigned int curr_block = offset / block_size;
+  while(curr_block <= size / block_size) {
+    if (curr_block <= 12) {
+      block_list[curr_block] = inode->direct_pointers[curr_block];
+    } else if (curr_block - 12 < 256) {
+      ext2_read_blocks(info, inode->singly_indirect_pointer, 1, block);
+      block_list[curr_block] = read_uint(block + (curr_block - 12)*4);
+    } else if (curr_block - 12 - 256 < 256*256) {
+      ext2_read_blocks(info, inode->doubly_indirect_pointer, 1, block);
+      // TODO: finish this!!
+    }
+    curr_block++;
+  }
+  block_list[curr_block] = NULL;
+
+  curr_block = 0;
+  do {
+    ext2_read_blocks(info, block_list[curr_block], 1, block);
+    int copy_ammount, copy_offset;
+    if (size - curr_block * block_size < block_size)
+      copy_ammount = size;
+    else
+      copy_ammount = block_size;
+    if (curr_block == 0)
+      copy_offset = offset % block_size;
+    memcpy(buffer+curr_block*block_size, block + copy_offset, copy_ammount);
+
+    curr_block++;
+  } while(block_list[curr_block]);
+
+  free(block, block_size);
+  return size;
+}
+
+unsigned int write(fs_node_t *node, unsigned int offset, unsigned int size, char *buffer) {
+  return 0; // TODO
+}
+
+void open(fs_node_t *node) {
+  // TODO
+}
+
+void close(fs_node_t *node) {
+  free(node, sizeof(fs_node_t));
+}
+
+
 struct dirent* readdir(struct fs_node* node, unsigned int index) {
   ext2_fs_info_t *info = (ext2_fs_info_t*)node->fs;
 
@@ -144,7 +208,7 @@ struct dirent* readdir(struct fs_node* node, unsigned int index) {
   int curr_entry = 0, entry_offset = 0, entry_size;
   ext2_read_blocks(info, inode->direct_pointers[0], 1, block);
   while(curr_entry != index) {
-    entry_size = block[entry_offset + 4] + block[entry_offset + 5]*0x10;
+    entry_size = block[entry_offset + 4] + block[entry_offset + 5]*0x100;
     if (!entry_size)
       return NULL;
     entry_offset += entry_size;
@@ -152,8 +216,10 @@ struct dirent* readdir(struct fs_node* node, unsigned int index) {
   }
   unsigned int e_inode;
   int i;
-  //  for(i=0;i<4;i++) printf("%x ", block[entry_offset+i]);
-  e_inode = block[entry_offset] + block[entry_offset+1]*0x100 + block[entry_offset+2]*0x10000 + block[entry_offset+3]*0x1000000;
+
+  e_inode = read_uint(block + entry_offset);
+  /* for(i=0;i<4;i++) printf("%x ", (unsigned int)block[entry_offset+i]); */
+  /* printf("inode: %x,%d\n", e_inode, e_inode); */
   if (!e_inode)
     return NULL;
 
@@ -176,12 +242,10 @@ fs_node_t* finddir(fs_node_t *node, char *name) {
   if (name[0] == '/') name++;
   int i=0;
   while(name[i] != '/' && name[i] != '\0') i++;
-  if (i == 0) {
-    return node;} // name == "/" or name == ""
+  if (i == 0) return node; // name == "/" or name == ""
   char *dir = (char*)malloc(i);//strpbrk(name, "/");
   memcpy(dir, name, i);
-  if (dir[i] == '/') dir[i] = '\0';
-
+  /* if (dir[i] == '/')  */dir[i] = '\0';
   struct dirent *dcopy = (struct dirent*)malloc(sizeof(struct dirent));
   if (dir) {
     while(curr_dirent = node->readdir(node, curr_index)) {
@@ -207,40 +271,5 @@ fs_node_t* finddir(fs_node_t *node, char *name) {
   } else {
     return node;
   }
-
-
-
-
-
-
-
-
-
-  /* if (!dir) */
-  /*   return dir_node; */
-
-  /* while(dir) { */
-  /*   curr_index = 0; */
-  /*   printf("entering %s\n", dir); */
-  /*   while(curr_dirent = dir_node->readdir(dir_node, curr_index)) { */
-  /*     printf("checking : %s - %d\n", curr_dirent->name, curr_dirent->inode); */
-  /*     if (!strcmp(dir, curr_dirent->name)) { */
-  /*       dir_node = ext2_inode_to_fs(info, curr_dirent->inode, ext2_read_inode(info, curr_dirent->inode)); */
-  /*       printf("occurrence found: %s, inode: %d\n", curr_dirent->name, curr_dirent->inode); */
-  /*       break; */
-  /*     } */
-  /*     curr_index++; */
-  /*   } */
-  /*   if (curr_dirent == NULL) { */
-  /*     printf("curr_dirent is null\n"); */
-  /*     return NULL; // Directory not found */
-  /*   } */
-  /*   printf("next level...\n"); */
-
-  /*   dir = strtok(NULL, "/"); */
-  /* }; */
-  /* printf("finished searching, inode:%d\n", dir_node->inode); */
-
-  /* return dir_node; */
 
 }

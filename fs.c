@@ -44,19 +44,33 @@ partition_info_t** init_partition_table(lba_drive_t *d) {
       case FS_TYPE_EXT2:
         fs_root = ext2_root_node(ext2_init_fs(p));
 
-        int i=0;
-        struct dirent* entry;
-        char dir[] = "/boot/grub/..";
-        fs_node_t *n = fs_finddir(fs_root, dir);
-        if (n) {
-          while(entry = fs_readdir(n, i++)) {
-            printf("%s - %d\n", entry->name, entry->inode);
-          };
-          printf("all done.\n");
-        } else {
-          printf("dir not found\n");
-        }
+        /* int i=0; */
+        /* struct dirent* entry; */
+        /* char dir[] = "/boot/"; */
+        /* fs_node_t *n = fs_finddir(fs_root, dir); */
+        /* if (n) { */
+        /*   while(entry = fs_readdir(n, i++)) { */
+        /*     printf("%s - %d\n", entry->name, entry->inode); */
+        /*   } */
+        /*   printf("all done.\n"); */
+        /* } else { */
+        /*   printf("dir not found\n"); */
+        /* } */
 
+        /* char path[] = "/boot/grub/grub.cfg"; */
+        /* file_t *f = fopen(path, "w"); */
+        /* if (f) { */
+        /*   char *buff = (char*)malloc(20); */
+        /*   int i; */
+        /*   for(i=0; i < 3; i++) { */
+        /*     fread(buff, 1, 19, f); */
+        /*     buff[19] = '\0'; */
+        /*     puts(buff); */
+        /*   } */
+        /*   fclose(f); */
+        /* } else { */
+        /*   printf("file not found\n"); */
+        /* } */
         break;
       default:
         printf("unknown file system id:%x\n", p->system_id);
@@ -115,6 +129,46 @@ fs_node_t *fs_finddir
     return node->finddir(node, name);
   else
     return 0;
+}
+
+file_t* fopen(const char *path, const char *mode) {
+  unsigned char owrite = 0, oread = 0;
+  unsigned char mode_flags;
+  fs_node_t *node = fs_finddir(fs_root, path);
+  if (!node)
+    return NULL;
+
+  int i = 0;
+  while(mode[i]) {
+    switch(mode[0]) {
+    case 'r':
+      oread = 1;
+      mode_flags |= FS_MODE_READ;
+    case 'w':
+      owrite = 1;
+      mode_flags |= FS_MODE_WRITE;
+    case 'b':
+      mode_flags |= FS_MODE_BINARY;
+    }
+    i++;
+  }
+  fs_open(node, oread, owrite);
+  file_t *f = (file_t*)malloc(sizeof(file_t));
+  f->mode = mode_flags;
+  f->node = node;
+  f->pos = 0;
+
+  return f;
+}
+void fclose(file_t* f) {
+  free(f, sizeof(f));
+}
+unsigned int fread
+(void *ptr, unsigned int size, unsigned int count, file_t *f) {
+  unsigned int tot_read;
+  tot_read = fs_read(f->node, f->pos, size * count, ptr);
+  f->pos += tot_read;
+  return tot_read;
 }
 
 void init_fs() {

@@ -40,4 +40,6 @@ unsigned char kbdus[] = {
   0,	/* All other keys are undefined */
 };
 
+char getch();
+
 #endif

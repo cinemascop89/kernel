@@ -14,6 +14,12 @@
 #define FS_SYMLINK     0x06
 #define FS_MOUNTPOINT  0x08 // Is the file an active mountpoint?
 
+// File modes: first bit is read/write, second bit is append, third on is binary mode
+#define FS_MODE_READ 0
+#define FS_MODE_WRITE 2
+#define FS_MODE_APPEND 4
+#define FS_MODE_BINARY 8
+
 typedef struct partition_info {
   char active;
   char start_head;
@@ -39,6 +45,12 @@ typedef void (*open_type_t)(struct fs_node*);
 typedef void (*close_type_t)(struct fs_node*);
 typedef struct dirent * (*readdir_type_t)(struct fs_node*,unsigned int);
 typedef struct fs_node * (*finddir_type_t)(struct fs_node*,char *name);
+
+typedef struct file {
+  unsigned short mode;
+  unsigned int pos;
+  fs_node_t *node;
+} file_t;
 
 struct dirent {
   char name[128];
@@ -73,6 +85,10 @@ void fs_open(fs_node_t *node, unsigned char read, unsigned char write);
 void fs_close(fs_node_t *node);
 struct dirent *fs_readdir(fs_node_t *node, unsigned int index);
 fs_node_t *fs_finddir(fs_node_t *node, char *name);
+
+file_t* fopen(const char *path, const char *mode);
+void fclose(file_t* f);
+unsigned int fread(void *ptr, unsigned int size, unsigned int count, file_t *f);
 
 partition_info_t* parse_partition_info(char* sector);
 partition_info_t** init_partition_table(lba_drive_t *d);

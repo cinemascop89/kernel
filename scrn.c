@@ -145,11 +145,13 @@ void printf(const char *format, ...) {
       case 'b':
         putint(va_arg(args, int), 2);
         break;
+      case 'c':
+        putch(va_arg(args, char));
+        break;
       case 'f':
         putfloat(va_arg(args, float));
         break;
       case '%':
-        puts("[esc]");
         putch('%');
       }
       curr_arg++;

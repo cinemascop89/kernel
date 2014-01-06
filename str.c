@@ -3,6 +3,11 @@
 
 static char *olds;
 
+unsigned int read_uint(char *b) {
+  return (unsigned char)b[0] + (unsigned char)b[1]*0x100 +
+    (unsigned char)b[2]*0x10000 + (unsigned char)b[3]*0x1000000;
+}
+
 int strlen(const char *str) {
   int len = 0;
   while (str[len] != '\0') {
