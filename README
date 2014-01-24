@@ -1,2 +1,17 @@
-sudo losetup /dev/loop1 disk.img -o 1048576
-sudo mount /dev/loop1 /mnt
+A hoby OS, made to learn about OS development and low level programming.
+
+Current features are:
+
+  * Keyboard and video support
+  * Paging
+  * Memory allocation
+  * Read-only Ext2 filesystem
+  * IRQs
+
+Planned features:
+
+  * Execution of ELF files (in progress)
+  * Task scheduling
+  * More filesystems (FAT?)
+  * System calls
+  * A graphic environment
