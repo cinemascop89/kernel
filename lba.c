@@ -174,7 +174,6 @@ void identify(unsigned short drive_t) {
 void init_drives() {
   unsigned char response;
   int i;
-
   for (i=0; i < 4; i++) drives[i] = NULL;
 
    /* irq_install_handler(14, primary_disk_handler); */

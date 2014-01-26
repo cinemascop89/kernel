@@ -23,6 +23,8 @@ partition_info_t* parse_partition_info(char* sector) {
 
   info->start_lba = sector[8] + sector[9]*0x100 + sector[10]*0x10000 + sector[11]*0x1000000;
   info->total_sectors = sector[12] + sector[13]*0x100 + sector[14]*0x10000 + sector[15]*0x1000000;
+
+  return info;
 }
 
 partition_info_t** init_partition_table(lba_drive_t *d) {
@@ -131,6 +133,21 @@ fs_node_t *fs_finddir
     return 0;
 }
 
+dir_t* opendir(char *path) {
+  fs_node_t *node = fs_finddir(fs_root, path);
+  if (!node)
+    return NULL;
+  dir_t *d = (dir_t*)malloc(sizeof(dir_t));
+  d->pos = 0;
+  d->node = node;
+  return d;
+}
+
+struct dirent* readdir(dir_t *d) {
+  d->pos++;
+  return fs_readdir(d->node, d->pos - 1);
+}
+
 file_t* fopen(const char *path, const char *mode) {
   unsigned char owrite = 0, oread = 0;
   unsigned char mode_flags;
@@ -169,6 +186,24 @@ unsigned int fread
   tot_read = fs_read(f->node, f->pos, size * count, ptr);
   f->pos += tot_read;
   return tot_read;
+}
+
+void fseek(file_t *f, unsigned int offset, int whence) {
+  switch(whence) {
+  case SEEK_SET:
+    f->pos = offset;
+    break;
+  case SEEK_CUR:
+    f->pos += offset;
+    break;
+  case SEEK_END:
+    f->pos = f->node->length;
+    break;
+  }
+}
+
+unsigned int ftell(file_t *f) {
+  return f->pos;
 }
 
 void init_fs() {

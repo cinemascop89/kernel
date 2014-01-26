@@ -2,10 +2,10 @@
 #include <types.h>
 #include <str.h>
 #include <colors.h>
-#include <lba.h>
-#include <ext2.h>
+#include <sh.h>
 #include <fs.h>
 #include <multiboot.h>
+#include <paging.h>
 
 unsigned char *memcpy(unsigned char *dest, const unsigned char *src, int count) {
   int i;
@@ -52,16 +52,16 @@ void test_allocation() {
   printf("a=%d, b=%d\n", *a, *b);
 }
 
-void test_lba() {
-  unsigned char buff[1024];
-  lba_drive_t* drive = get_drive(LBA_PRIMARY_MASTER);
-  lba_read_sectors(drive, 0, 1, buff);
-  partition_info_t *i = parse_partition_info((char*)(buff+446));
+/* void test_lba() { */
+/*   unsigned char buff[1024]; */
+/*   lba_drive_t* drive = get_drive(LBA_PRIMARY_MASTER); */
+/*   lba_read_sectors(drive, 0, 1, buff); */
+/*   partition_info_t *i = parse_partition_info((char*)(buff+446)); */
 
-  lba_read_sectors(drive, i->start_lba+2, 1, buff);
-  ext2_superblock_t *ei = ext2_parse_superblock(buff);
-  printf("signature: %x\n", ei->signature);
-}
+/*   lba_read_sectors(drive, i->start_lba+2, 1, buff); */
+/*   ext2_superblock_t *ei = ext2_parse_superblock(buff); */
+/*   printf("signature: %x\n", ei->signature); */
+/* } */
 
 void cpuid(){
    unsigned int eax, ebx, ecx, edx;
@@ -116,7 +116,9 @@ void inportsw(unsigned short port, void *addr, unsigned long count)
 }
 
 void outportb(unsigned short _port, unsigned char _data) {
+  printf("out: 0x%x\n", &_data);
   __asm__ __volatile__ ("outb %1, %0" : : "dN" (_port), "a" (_data));
+  printf("init drives4\n");
 }
 
 void outportw(unsigned short _port, unsigned int _data) {
@@ -130,7 +132,8 @@ void outportw(unsigned short _port, unsigned int _data) {
 
 main(multiboot_info_t *mbd, unsigned int magic) {
 
-  init_paging();
+  init_mem((memory_map_t*)mbd->mmap_addr,
+           mbd->mmap_addr + mbd->mmap_length);
   gdt_install();
   idt_install();
   isrs_install();
@@ -138,16 +141,19 @@ main(multiboot_info_t *mbd, unsigned int magic) {
 
   __asm__ __volatile__ ("sti");
 
+  init_video();
+
+  init_paging((memory_map_t*)mbd->mmap_addr,
+              mbd->mmap_addr + mbd->mmap_length);
+
   timer_install();
   keyboard_install();
 
-  init_video();
   welcome_message();
   cpuid();
-  printf("GRUB flags: %b\n", mbd->flags);
+  //  printf("GRUB flags: %b\n", mbd->flags);
 
-  //  if (mbd->flags & MULTIBOOT_MEM_FLAG) {
-  if (0) {
+  if (mbd->flags & MULTIBOOT_MEM_FLAG) {
     unsigned long total_mem = 0, entry_size;
     printf("Memory map:\n");
     memory_map_t *mmap = mbd->mmap_addr;
@@ -163,8 +169,9 @@ main(multiboot_info_t *mbd, unsigned int magic) {
     }
     printf("Available memory: %d mbytes\n", total_mem / 1024 / 1024);
   }
-  init_mem((memory_map_t*)mbd->mmap_addr,
-           mbd->mmap_addr + mbd->mmap_length);
+
+  /* unsigned int *ptr = (unsigned int*)0xA0000000; */
+  /* unsigned int do_page_fault = *ptr; */
 
   /* char in[] = "/boot", *tok; */
   /* strtok((char*)"/boot", "/"); */
@@ -173,6 +180,7 @@ main(multiboot_info_t *mbd, unsigned int magic) {
 
   init_fs();
   //  test_lba();
+  sh();
 
   for (;;);
 }

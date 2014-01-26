@@ -8,7 +8,7 @@ unsigned int read(fs_node_t*,unsigned int,unsigned int,char*);
 unsigned int write(fs_node_t*,unsigned int,unsigned int,char*);
 void open(fs_node_t*);
 void close(fs_node_t*);
-struct dirent* readdir(struct fs_node* node, unsigned int index);
+struct dirent* ext2_readdir(struct fs_node* node, unsigned int index);
 fs_node_t* finddir(fs_node_t *node, char *name);
 
 ext2_superblock_t* ext2_parse_superblock(char *buff) {
@@ -130,7 +130,7 @@ fs_node_t* ext2_inode_to_fs
   node->open = open;
   node->close = close;
   node->finddir = finddir;
-  node->readdir = readdir;
+  node->readdir = ext2_readdir;
 
   return node;
 
@@ -200,7 +200,7 @@ void close(fs_node_t *node) {
 }
 
 
-struct dirent* readdir(struct fs_node* node, unsigned int index) {
+struct dirent* ext2_readdir(struct fs_node* node, unsigned int index) {
   ext2_fs_info_t *info = (ext2_fs_info_t*)node->fs;
 
   char *block = (char*)malloc(ext2_get_block_size(info->superblock));

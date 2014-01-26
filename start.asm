@@ -9,8 +9,8 @@ global start
 ;; start:
 ;;     mov esp, _sys_stack
 ;;     jmp stublet
-; This part MUST be 4byte aligned, so we solve that issue using 'ALIGN 4'
-	; Multiboot constants
+
+; Multiboot constants
 MULTIBOOT_PAGE_ALIGN	equ 1<<0
 MULTIBOOT_MEMORY_INFO	equ 1<<1
 MULTIBOOT_HEADER_MAGIC	equ 0x1BADB002
@@ -25,16 +25,16 @@ multiboot_header:
 	dd MULTIBOOT_CHECKSUM
 
 start:
-    lgdt [trickgdt]
-    mov ax, 0x10
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-    mov ss, ax
-    jmp 0x08:higherhalf
-    ;; mov esp, _sys_stack     ; This points the stack to our new stack area
-    ;; jmp stublet
+    ;; lgdt [trickgdt]
+    ;; mov ax, 0x10
+    ;; mov ds, ax
+    ;; mov es, ax
+    ;; mov fs, ax
+    ;; mov gs, ax
+    ;; mov ss, ax
+    ;; jmp 0x08:higherhalf
+    mov esp, _sys_stack     ; This points the stack to our new stack area
+    jmp stublet
 
 higherhalf:
     mov esp, _sys_stack

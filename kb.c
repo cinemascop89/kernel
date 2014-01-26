@@ -16,9 +16,12 @@ void keyboard_handler(struct regs *r) {
   }
 }
 
+void scans(char *s) {
+}
+
 char getch() {
   curr_char = NULL;
-  while(!curr_char);
+  while(!curr_char) printf("");
   return curr_char;
 }
 

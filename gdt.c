@@ -55,4 +55,5 @@ void gdt_install() {
   gdt_set_gate(2, 0, 0xffffffff, 0x92, 0xcf);
 
   gdt_flush();
+
 }

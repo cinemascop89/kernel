@@ -20,6 +20,9 @@
 #define FS_MODE_APPEND 4
 #define FS_MODE_BINARY 8
 
+#define SEEK_SET 0
+#define SEEK_CUR 1
+#define SEEK_END -1
 typedef struct partition_info {
   char active;
   char start_head;
@@ -51,6 +54,11 @@ typedef struct file {
   unsigned int pos;
   fs_node_t *node;
 } file_t;
+
+typedef struct dir {
+  unsigned int pos;
+  fs_node_t *node;
+} dir_t;
 
 struct dirent {
   char name[128];
@@ -86,9 +94,13 @@ void fs_close(fs_node_t *node);
 struct dirent *fs_readdir(fs_node_t *node, unsigned int index);
 fs_node_t *fs_finddir(fs_node_t *node, char *name);
 
+dir_t* opendir(char *path);
+struct dirent* readdir(dir_t *d);
 file_t* fopen(const char *path, const char *mode);
 void fclose(file_t* f);
 unsigned int fread(void *ptr, unsigned int size, unsigned int count, file_t *f);
+void fseek(file_t *f, unsigned int offset, int whence);
+unsigned int ftell(file_t *f);
 
 partition_info_t* parse_partition_info(char* sector);
 partition_info_t** init_partition_table(lba_drive_t *d);

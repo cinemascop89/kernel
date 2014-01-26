@@ -22,6 +22,8 @@
 #define ICW4_BUF_MASTER	0x0C		/* Buffered mode/master */
 #define ICW4_SFNM	0x10		/* Special fully nested (not) */
 
+#define PANIC(msg) printf("KERNEL PANIC! at %s:%d:\n%s\n", __FILE__, __LINE__, msg); for(;;);
+
 
 /* MAIN.C */
 extern unsigned char *memcpy(unsigned char *dest, const unsigned char *src, int count);
@@ -30,19 +32,18 @@ extern unsigned short *memsetw(unsigned short *dest, unsigned short val, int cou
 unsigned char inportb (unsigned short _port);
 unsigned int inportw (unsigned short _port);
 void inportsw(unsigned short port, void *addr, unsigned long count);
-//void inportsw(unsigned short _port, void* buff, unsigned long count);
+void inportsw(unsigned short _port, void* buff, unsigned long count);
 void outportb (unsigned short _port, unsigned char _data);
 void outportw (unsigned short _port, unsigned int _data);
-//void outportsw(unsigned short _port, unsigned int _data);
+void outportsw(unsigned short _port, unsigned int _data);
 
-extern void cls();
-extern void putch(unsigned char c);
-extern void putint(int val, int b);
-extern void puts(unsigned char *str);
-extern void settextcolor(unsigned char forecolor, unsigned char backcolor);
-extern void init_video();
-
-void init_paging();
+void cls();
+void putch(unsigned char c);
+void putint(int val, int b);
+void puts(unsigned char *str);
+void printf(const char *format, ...);
+void settextcolor(unsigned char forecolor, unsigned char backcolor);
+void init_video();
 
 extern void gdt_set_gate(int num, unsigned long base, unsigned long limit, unsigned char access, unsigned char gran);
 extern void gdt_install();
@@ -71,6 +72,12 @@ void keyboard_install();
 
 extern void do_e820();
 void init_mem(memory_map_t *mmap, int map_size);
+
+unsigned int kmalloc_a(int size);
+unsigned int kmalloc_p(int size, unsigned int *phys);
+unsigned int kmalloc_ap(int size, unsigned int *phys);
+unsigned int kmalloc(int size);
+
 void* malloc(int size);
 void free(void* p, int size);
 #endif

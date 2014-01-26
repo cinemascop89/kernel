@@ -52,6 +52,7 @@ void putch(unsigned char c) {
 
   if (c == 0x08) {
     if (csr_x != 0) csr_x--;
+    textmemptr[csr_y * 80 + csr_x] = ' ';
   } else if (c == 0x09) {
     csr_x = (csr_x + 8) & ~(8 - 1);
   } else if (c == '\r') {
@@ -84,18 +85,11 @@ void puts(unsigned char *text) {
 void putint(int val, int b) {
   static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
   char result[30];
-  int tot_digits = 0, orig_val = val, curr_digit, i=0, j;
+  int i=0, j;
 
   if (val < 0) {
     val = -val;
   }
-  /* do { */
-  /*   tot_digits++; */
-  /* } while ((val /= b) > 0); */
-  /* curr_digit = tot_digits; */
-  /* do { */
-  /*   putch(digits[orig_val/pow(b, curr_digit - 1) - orig_val/pow(b, curr_digit)*b]); */
-  /* } while (--curr_digit); */
   int n1 = val;
   if (n1 == 0) {
     putch('0');
