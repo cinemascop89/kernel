@@ -4,9 +4,13 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <multiboot.h>
 #include <descriptor_tables.h>
 #include <irq.h>
 #include <timer.h>
+//#include <kb.h> Gives multiple declaration error
+#include <kheap.h>
+#include <paging.h>
 #include <str.h>
 #include <scrn.h>
 #include <colors.h>
@@ -47,8 +51,17 @@ static inline bool are_interrupts_enabled()
     return flags & (1 << 9);
 }
 
-void kmain()
-{
+void show_mmap(multiboot_info_t *mbd) {
+  multiboot_memory_map_t *mmap = (multiboot_memory_map_t*)mbd->mmap_addr;
+  uint32_t size = 0;
+  do {
+    //printf("addr: %l, len: %l, type: %d\n", mmap->addr, mmap->len, mmap->type);
+      size += mmap->size + sizeof(uint32_t);
+      mmap = (multiboot_memory_map_t*)(mbd->mmap_addr + size);
+  } while (size < mbd->mmap_length);
+}
+
+void kmain(multiboot_info_t *mbd, uint32_t magic) {
   init_gdt();
   init_idt();
   init_isrs();
@@ -61,6 +74,18 @@ void kmain()
   keyboard_install();
 
   welcome_message();
+
+  printf("Available memory: %d Mb\n", mbd->mem_upper/1024);
+  if (magic == MULTIBOOT_BOOTLOADER_MAGIC)
+    show_mmap(mbd);
+
+
+  init_mem();
+  init_paging();
+  printf("Hello, paged world!\n");
+
+  uint32_t *ptr = (uint32_t*) 0xa0000000;
+  printf("fault: 0xd\n", *ptr);
 
   while(1) {
     putch(getch());

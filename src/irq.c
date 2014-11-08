@@ -1,6 +1,5 @@
 #include <irq.h>
 #include <io.h>
-#include <scrn.h>
 #include <stdint.h>
 
 extern void irq0();
@@ -28,7 +27,6 @@ void *irq_routines[16] = {
 
 void irq_install_handler(uint32_t irq, void (*handler)(struct regs *r)) {
   irq_routines[irq] = handler;
-  printf("irq %d installed at 0x%x\n", irq, handler);
 }
 
 void irq_uninstall_handler(uint32_t irq) {

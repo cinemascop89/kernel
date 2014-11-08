@@ -41,5 +41,6 @@ char kbdus[] = {
 };
 
 char getch();
+void keyboard_install();
 
 #endif

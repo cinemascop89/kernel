@@ -1,6 +1,7 @@
 #include <descriptor_tables.h>
 #include <irq.h>
 #include <scrn.h>
+#include <stdbool.h>
 
 extern void isr0();
 extern void isr1();
@@ -110,7 +111,19 @@ void fault_handler(struct regs *r) {
   if (r->int_no < 32) {
     printf("%d : %s Exception!",
            r->int_no, exception_messages[r->int_no]);
-    if (r->err_code)
+
+    if (r->int_no == 14) { // Page fault
+        bool present = !(r->err_code & 0x1); // Page not present
+        bool rw = (r->err_code & 0x2) != 0;    // Is write operation
+        bool us = (r->err_code & 0x4) != 0;    // In user mode
+        bool reserved = (r->err_code & 0x8) != 0;
+        bool id = (r->err_code & 0x10) != 0;   // Caused by instruction fetch
+        if (present) printf(" P");
+        if (rw) printf(" RW");
+        if (us) printf(" US");
+        if (reserved) printf( "R");
+        if (id) printf(" ID");
+    } else if (r->err_code)
       printf(" Error code: %d", r->err_code);
     putch('\n');
 

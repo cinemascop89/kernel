@@ -33,6 +33,8 @@ stack_top:
 .type _start, @function
 _start:
 	movl $stack_top, %esp
+        push %eax # grub magic
+	push %ebx # multiboot_info
 	call kmain
 	cli
 	hlt

@@ -1,6 +1,7 @@
 #include <scrn.h>
 #include <str.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <stddef.h>
 #include <math.h>
 #include <io.h>
@@ -130,10 +131,10 @@ void printf(const char *format, ...) {
         puts(va_arg(args, char*));
         break;
       case 'd':
-        putint(va_arg(args, int), 10);
+        putint(va_arg(args, uint32_t), 10);
         break;
       case 'l':
-        putint(va_arg(args, long), 10);
+        putint(va_arg(args, uint64_t), 10);
         break;
       case 'x':
         putint(va_arg(args, int), 16);
