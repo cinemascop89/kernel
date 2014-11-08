@@ -5,3 +5,6 @@
 *.map
 *.*~
 docs/
+mnt/
+src/mnt/
+dumps/
