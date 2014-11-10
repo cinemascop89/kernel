@@ -97,7 +97,7 @@ void init_paging() {
   }
 
   i = 0;
-  while (i < placement_addr+14) {
+  while (i < placement_addr+0x1000) { // Identity-map until placement_addr and some space for kheap
     alloc_frame(get_page(i, true, kernel_directory), 0, 0);
     i += 0x1000;
   }
