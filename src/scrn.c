@@ -85,7 +85,7 @@ void puts(unsigned char *text) {
   }
 }
 
-void putint(int val, int b) {
+void putint(unsigned int val, unsigned int b) {
   static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
   char result[30];
   int i=0, j;
@@ -93,7 +93,7 @@ void putint(int val, int b) {
   if (val < 0) {
     val = -val;
   }
-  int n1 = val;
+  unsigned int n1 = val;
   if (n1 == 0) {
     putch('0');
     return;

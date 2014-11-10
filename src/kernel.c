@@ -8,7 +8,7 @@
 #include <descriptor_tables.h>
 #include <irq.h>
 #include <timer.h>
-//#include <kb.h> Gives multiple declaration error
+#include <kb.h>
 #include <kheap.h>
 #include <paging.h>
 #include <str.h>
@@ -79,10 +79,25 @@ void kmain(multiboot_info_t *mbd, uint32_t magic) {
   if (magic == MULTIBOOT_BOOTLOADER_MAGIC)
     show_mmap(mbd);
 
-
-  init_mem();
   init_paging();
-  printf("Hello, paged world!\n");
+
+  printf("paging init!\n");
+
+  uint32_t *a = kmalloc(sizeof(uint32_t));
+  *a = 0xaabbccdd;
+  uint32_t *b = kmalloc(sizeof(uint32_t));
+  *b = 0x44332211;
+  printf("a=0x%x @ 0x%x, b=0x%x @ 0x%x\n", *a, a, *b, b);
+
+  free(a);
+  printf("a freed\n");
+  free(b);
+  printf("b freed\n");
+
+  uint32_t *c = kmalloc(sizeof(uint32_t)*2);
+  c[0] = 121314;
+  c[1] = 161718;
+  printf("[%d, %d]\n", c[0], c[1]);
 
   uint32_t *ptr = (uint32_t*) 0xa0000000;
   printf("fault: 0xd\n", *ptr);

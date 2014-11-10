@@ -3,7 +3,7 @@
 
 void cls();
 void putch(char c);
-void putint(int val, int b);
+void putint(unsigned int val, unsigned int b);
 void puts(unsigned char *str);
 void printf(const char *format, ...);
 void settextcolor(unsigned char forecolor, unsigned char backcolor);

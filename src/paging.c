@@ -91,17 +91,26 @@ void init_paging() {
   memset(kernel_directory, 0, sizeof(page_directory_t));
   current_directory = kernel_directory;
 
-  uint32_t i = 0;
-  while(i < placement_addr) {
+  uint32_t i;
+  for (i = KHEAP_START; i < KHEAP_START + KHEAP_INITIAL_SIZE; i += 0x1000) {
+    get_page(i, true, kernel_directory);
+  }
+
+  i = 0;
+  while (i < placement_addr+14) {
     alloc_frame(get_page(i, true, kernel_directory), 0, 0);
     i += 0x1000;
   }
 
-  printf("frames allocated: %d\n", i/0x1000);
+  for (i = KHEAP_START; i < KHEAP_START + KHEAP_INITIAL_SIZE; i += 0x1000) {
+    alloc_frame(get_page(i, false, kernel_directory), 0, 0);
+  }
 
   // TODO: register page fault handler
 
   switch_page_directory(kernel_directory);
+
+  init_kheap();
 
 }
 
